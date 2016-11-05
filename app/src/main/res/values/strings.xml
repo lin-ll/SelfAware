@@ -1,0 +1,35 @@
+<resources>
+    <string name="app_name">SelfAware</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="call_pipeline">
+        {"@type":"edu.mit.media.funf.pipeline.BasicPipeline",
+         "name":"call_p",
+         "version":1,
+         "data":[
+            "edu.mit.media.funf.probe.builtin.CallLogProbe"
+         ]
+        }
+    </string>
+    <string name="sms_pipeline">
+        {"@type":"edu.mit.media.funf.pipeline.BasicPipeline",
+         "name":"sms_p",
+         "version":1,
+         "data":[
+            "edu.mit.media.funf.probe.builtin.SmsProbe"
+         ]
+        }
+    </string>
+    <string name="act_pipeline">
+        {"@type":"edu.mit.media.funf.pipeline.BasicPipeline",
+         "name":"act_p",
+         "version":1,
+         "data":[
+            "edu.mit.media.funf.probe.builtin.ActivityProbe"
+         ]
+        }
+    </string>
+</resources>
