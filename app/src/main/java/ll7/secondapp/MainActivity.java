@@ -28,14 +28,15 @@ import edu.mit.media.funf.storage.NameValueDatabaseHelper;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Probe.DataListener {
 
-    public static final String CALL_PIPE = "call_p", SMS_PIPE = "sms_p", ACT_PIPE = "act_p";
+    public static final String CALL_PIPE = "call_p", SMS_PIPE = "sms_p", ACT_PIPE = "act_p";//, LOC_PIPE = "loc_p";
     private FunfManager funfManager;
-    private BasicPipeline callpipe, smspipe, actpipe;
+    private BasicPipeline callpipe, smspipe, actpipe;//, locpipe;
     private CallLogProbe callProbe;
     private ActivityProbe actProbe;
     private SmsProbe smsProbe;
-    private CheckBox enabledCall, enabledSMS, enabledAct;
-    private Button archiveButton, scanCall, scanSMS, scanAct;
+    //private LocationProbe locProbe;
+    private CheckBox enabledCall, enabledSMS, enabledAct;//, enabledLoc;
+    private Button archiveButton, scanCall, scanSMS, scanAct;//, scanLoc;
     private TextView dataCountView;
     private Handler handler;
 
@@ -52,7 +53,7 @@ public class MainActivity extends AppCompatActivity
      */
     private void updateScanCount() {
         // Query the pipeline db for the count of rows in the data table
-        final int count = updateHelper(callpipe) + updateHelper(smspipe) + updateHelper(actpipe);
+        final int count = updateHelper(callpipe) + updateHelper(smspipe) + updateHelper(actpipe);// + updateHelper(locpipe);
         // Update interface on main thread
         runOnUiThread(new Runnable() {
             @Override
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity
         callProbe.registerPassiveListener(MainActivity.this);
         smsProbe.registerPassiveListener(MainActivity.this);
         actProbe.registerPassiveListener(MainActivity.this);
+        //locProbe.registerPassiveListener(MainActivity.this);
     }
 
     public void onDataReceived(IJsonObject probeConfig, IJsonObject data) {
@@ -76,6 +78,7 @@ public class MainActivity extends AppCompatActivity
         callProbe.registerPassiveListener(MainActivity.this);
         smsProbe.registerPassiveListener(MainActivity.this);
         actProbe.registerPassiveListener(MainActivity.this);
+        //locProbe.registerPassiveListener(MainActivity.this);
     }
 
     public void pipelineHelper(int pipe, String which, boolean isChecked) {
@@ -88,6 +91,8 @@ public class MainActivity extends AppCompatActivity
                     smspipe = (BasicPipeline) funfManager.getRegisteredPipeline(which);
                 } else if (pipe == 2) {
                     actpipe = (BasicPipeline) funfManager.getRegisteredPipeline(which);
+                } else if (pipe == 3) {
+                    //locpipe = (BasicPipeline) funfManager.getRegisteredPipeline(which);
                 }
             } else funfManager.disablePipeline(which);
         }
@@ -102,6 +107,7 @@ public class MainActivity extends AppCompatActivity
             callProbe = gson.fromJson(new JsonObject(), CallLogProbe.class);
             smsProbe = gson.fromJson(new JsonObject(), SmsProbe.class);
             actProbe = gson.fromJson(new JsonObject(), ActivityProbe.class);
+            
 
             callpipe = (BasicPipeline) funfManager.getRegisteredPipeline(CALL_PIPE);
             smspipe = (BasicPipeline) funfManager.getRegisteredPipeline(SMS_PIPE);
