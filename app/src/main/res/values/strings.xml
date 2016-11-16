@@ -10,16 +10,22 @@
          "name":"default_p",
          "version":1,
          "archive": {
-            "@schedule": {"interval": 300}
+            "@schedule": {"interval": 300, "offset": 84600}
          },
          "data":[
             {
                 "@type": "edu.mit.media.funf.probe.builtin.CallLogProbe",
-                "@schedule": {"interval": 10}
+                "@schedule": {"interval": 1800}
             },
-            "edu.mit.media.funf.probe.builtin.SmsProbe",
+            {
+                "@type": "edu.mit.media.funf.probe.builtin.SmsProbe",
+                "@schedule": {"interval": 1800}
+            },
             "edu.mit.media.funf.probe.builtin.ActivityProbe",
-            "edu.mit.media.funf.probe.builtin.SimpleLocationProbe"
+            {
+                "@type": "edu.mit.media.funf.probe.builtin.SimpleLocationProbe",
+                "@schedule": {"interval": 600}
+            }
          ]
         }
     </string>
