@@ -9,8 +9,14 @@
         {"@type":"edu.mit.media.funf.pipeline.BasicPipeline",
          "name":"default_p",
          "version":1,
+         "archive": {
+            "@schedule": {"interval": 300}
+         },
          "data":[
-            "edu.mit.media.funf.probe.builtin.CallLogProbe",
+            {
+                "@type": "edu.mit.media.funf.probe.builtin.CallLogProbe",
+                "@schedule": {"interval": 10}
+            },
             "edu.mit.media.funf.probe.builtin.SmsProbe",
             "edu.mit.media.funf.probe.builtin.ActivityProbe",
             "edu.mit.media.funf.probe.builtin.SimpleLocationProbe"
