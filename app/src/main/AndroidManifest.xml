@@ -19,9 +19,7 @@
         </activity>
 
         <service android:name="edu.mit.media.funf.FunfManager">
-            <meta-data android:name="call_p" android:value="@string/call_pipeline"/>
-            <meta-data android:name="sms_p" android:value="@string/sms_pipeline"/>
-            <meta-data android:name="act_p" android:value="@string/act_pipeline"/>
+            <meta-data android:name="default_p" android:value="@string/default_pipeline"/>
         </service>
         <receiver android:name="edu.mit.media.funf.Launcher" android:enabled="true">
             <intent-filter>
@@ -42,10 +40,11 @@
 
     <!-- Storage -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
-    <!-- Location probe
+    <!-- Location probe -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>-->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <!-- Wifi probe -->
     <!--<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>

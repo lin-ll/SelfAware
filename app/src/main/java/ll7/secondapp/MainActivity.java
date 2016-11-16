@@ -28,32 +28,28 @@ import edu.mit.media.funf.storage.NameValueDatabaseHelper;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, Probe.DataListener {
 
-    public static final String CALL_PIPE = "call_p", SMS_PIPE = "sms_p", ACT_PIPE = "act_p";//, LOC_PIPE = "loc_p";
+    public static final String DEFAULT_PIPE = "default_p";
     private FunfManager funfManager;
-    private BasicPipeline callpipe, smspipe, actpipe;//, locpipe;
+    private BasicPipeline mypipe;
     private CallLogProbe callProbe;
     private ActivityProbe actProbe;
     private SmsProbe smsProbe;
-    //private LocationProbe locProbe;
-    private CheckBox enabledCall, enabledSMS, enabledAct;//, enabledLoc;
-    private Button archiveButton, scanCall, scanSMS, scanAct;//, scanLoc;
+    private SimpleLocationProbe locProbe;
+    private Button archiveButton, scanCall, scanSMS, scanAct, scanLoc;
     private TextView dataCountView;
     private Handler handler;
 
     private static final String TOTAL_COUNT_SQL = "SELECT count(*) FROM " + NameValueDatabaseHelper.DATA_TABLE.name;
 
-    public int updateHelper(BasicPipeline pipe) {
-        SQLiteDatabase db = pipe.getDb();
-        Cursor mcursor = db.rawQuery(TOTAL_COUNT_SQL, null);
-        mcursor.moveToFirst();
-        return mcursor.getInt(0);
-    }
     /**
      * Queries the database of the pipeline to determine how many rows of data we have recorded so far.
      */
     private void updateScanCount() {
         // Query the pipeline db for the count of rows in the data table
-        final int count = updateHelper(callpipe) + updateHelper(smspipe) + updateHelper(actpipe);// + updateHelper(locpipe);
+        SQLiteDatabase db = mypipe.getDb();
+        Cursor mcursor = db.rawQuery(TOTAL_COUNT_SQL, null);
+        mcursor.moveToFirst();
+        final int count = mcursor.getInt(0);
         // Update interface on main thread
         runOnUiThread(new Runnable() {
             @Override
@@ -69,7 +65,7 @@ public class MainActivity extends AppCompatActivity
         callProbe.registerPassiveListener(MainActivity.this);
         smsProbe.registerPassiveListener(MainActivity.this);
         actProbe.registerPassiveListener(MainActivity.this);
-        //locProbe.registerPassiveListener(MainActivity.this);
+        locProbe.registerPassiveListener(MainActivity.this);
     }
 
     public void onDataReceived(IJsonObject probeConfig, IJsonObject data) {
@@ -78,24 +74,7 @@ public class MainActivity extends AppCompatActivity
         callProbe.registerPassiveListener(MainActivity.this);
         smsProbe.registerPassiveListener(MainActivity.this);
         actProbe.registerPassiveListener(MainActivity.this);
-        //locProbe.registerPassiveListener(MainActivity.this);
-    }
-
-    public void pipelineHelper(int pipe, String which, boolean isChecked) {
-        if (funfManager != null) {
-            if (isChecked) {
-                funfManager.enablePipeline(which);
-                if (pipe == 0) {
-                    callpipe = (BasicPipeline) funfManager.getRegisteredPipeline(which);
-                } else if (pipe == 1) {
-                    smspipe = (BasicPipeline) funfManager.getRegisteredPipeline(which);
-                } else if (pipe == 2) {
-                    actpipe = (BasicPipeline) funfManager.getRegisteredPipeline(which);
-                } else if (pipe == 3) {
-                    //locpipe = (BasicPipeline) funfManager.getRegisteredPipeline(which);
-                }
-            } else funfManager.disablePipeline(which);
-        }
+        locProbe.registerPassiveListener(MainActivity.this);
     }
 
     private ServiceConnection funfManagerConn = new ServiceConnection() {
@@ -107,49 +86,26 @@ public class MainActivity extends AppCompatActivity
             callProbe = gson.fromJson(new JsonObject(), CallLogProbe.class);
             smsProbe = gson.fromJson(new JsonObject(), SmsProbe.class);
             actProbe = gson.fromJson(new JsonObject(), ActivityProbe.class);
-            
+            locProbe = gson.fromJson(new JsonObject(), SimpleLocationProbe.class);
 
-            callpipe = (BasicPipeline) funfManager.getRegisteredPipeline(CALL_PIPE);
-            smspipe = (BasicPipeline) funfManager.getRegisteredPipeline(SMS_PIPE);
-            actpipe = (BasicPipeline) funfManager.getRegisteredPipeline(ACT_PIPE);
+            mypipe = (BasicPipeline) funfManager.getRegisteredPipeline(DEFAULT_PIPE);
 
             callProbe.registerPassiveListener(MainActivity.this);
             smsProbe.registerPassiveListener(MainActivity.this);
             actProbe.registerPassiveListener(MainActivity.this);
+            locProbe.registerPassiveListener(MainActivity.this);
 
-            // This checkbox enables or disables the pipeline
-            enabledCall.setChecked(callpipe.isEnabled());
-            enabledCall.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                pipelineHelper(0, CALL_PIPE, isChecked);
-                }
-            });
-
-            enabledSMS.setChecked(smspipe.isEnabled());
-            enabledSMS.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                pipelineHelper(1, SMS_PIPE, isChecked);
-                }
-            });
-
-            enabledAct.setChecked(actpipe.isEnabled());
-            enabledAct.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    pipelineHelper(2, ACT_PIPE, isChecked);
-                }
-            });
+            if (funfManager != null) {
+                funfManager.enablePipeline(DEFAULT_PIPE);
+                mypipe = (BasicPipeline) funfManager.getRegisteredPipeline(DEFAULT_PIPE);
+            }
 
             // Set UI ready to use, by enabling buttons
-            enabledCall.setEnabled(true);
-            enabledSMS.setEnabled(true);
-            enabledAct.setEnabled(true);
             archiveButton.setEnabled(true);
             scanCall.setEnabled(true);
             scanSMS.setEnabled(true);
             scanAct.setEnabled(true);
+            scanLoc.setEnabled(true);
         }
 
         @Override
@@ -158,31 +114,12 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
-    public void handlerHelper() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getBaseContext(), "Archived!", Toast.LENGTH_SHORT).show();
-                updateScanCount();
-            }
-        }, 1000L);
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//            .setAction("Action", null).show();
-//            }
-//        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -199,28 +136,20 @@ public class MainActivity extends AppCompatActivity
         // Used to make interface changes on main thread
         handler = new Handler();
 
-        // Checkboxes
-        enabledCall = (CheckBox) findViewById(R.id.enabledCall);
-        enabledCall.setEnabled(false);
-        enabledSMS = (CheckBox) findViewById(R.id.enabledSMS);
-        enabledSMS.setEnabled(false);
-        enabledAct = (CheckBox) findViewById(R.id.enabledAct);
-        enabledAct.setEnabled(false);
-
         // Runs an archive if pipeline is enabled
         archiveButton = (Button) findViewById(R.id.archiveButton);
         archiveButton.setEnabled(false);
         archiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            if (!callpipe.isEnabled() && !smspipe.isEnabled() && !actpipe.isEnabled()) {
-                Toast.makeText(getBaseContext(), "No pipeline is enabled.", Toast.LENGTH_SHORT).show();
-            } else {
-                if (callpipe.isEnabled()) callpipe.onRun(BasicPipeline.ACTION_ARCHIVE, null);
-                if (smspipe.isEnabled()) smspipe.onRun(BasicPipeline.ACTION_ARCHIVE, null);
-                if (actpipe.isEnabled()) actpipe.onRun(BasicPipeline.ACTION_ARCHIVE, null);
-                handlerHelper();
-            }
+                mypipe.onRun(BasicPipeline.ACTION_ARCHIVE, null);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getBaseContext(), "Archived!", Toast.LENGTH_SHORT).show();
+                        updateScanCount();
+                    }
+                }, 1000L);
             }
         });
 
@@ -233,9 +162,7 @@ public class MainActivity extends AppCompatActivity
         scanCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (callpipe.isEnabled()) {
-                    callProbe.registerListener(callpipe);
-                } else Toast.makeText(getBaseContext(), "Pipeline is not enabled.", Toast.LENGTH_SHORT).show();
+                callProbe.registerListener(mypipe);
             }
         });
 
@@ -244,9 +171,7 @@ public class MainActivity extends AppCompatActivity
         scanSMS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (smspipe.isEnabled()) {
-                    smsProbe.registerListener(smspipe);
-                } else Toast.makeText(getBaseContext(), "Pipeline is not enabled.", Toast.LENGTH_SHORT).show();
+                smsProbe.registerListener(mypipe);
             }
         });
 
@@ -255,9 +180,17 @@ public class MainActivity extends AppCompatActivity
         scanAct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (actpipe.isEnabled()) {
-                    actProbe.registerListener(actpipe);
-                } else Toast.makeText(getBaseContext(), "Pipeline is not enabled.", Toast.LENGTH_SHORT).show();
+                actProbe.registerListener(mypipe);
+            }
+        });
+
+        scanLoc = (Button) findViewById(R.id.scanLoc);
+        scanLoc.setEnabled(false);
+        scanLoc.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                locProbe.registerListener(mypipe);
+                Log.d("", "location!!");
             }
         });
     }
