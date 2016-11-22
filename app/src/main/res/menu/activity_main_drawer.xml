@@ -3,34 +3,38 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
+            android:id="@+id/nav_home"
             android:icon="@drawable/ic_menu_camera"
-            android:title="SMS" />
+            android:title="Home" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_calls"
             android:icon="@drawable/ic_menu_gallery"
             android:title="Calls" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/nav_sms"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="Steps" />
+            android:title="SMS" />
         <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_act"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Battery" />
+            android:title="Activity" />
+        <item
+            android:id="@+id/nav_loc"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Location" />
     </group>
 
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
-        </menu>
-    </item>
+    <!--<item android:title="Communicate">-->
+        <!--<menu>-->
+            <!--<item-->
+                <!--android:id="@+id/nav_share"-->
+                <!--android:icon="@drawable/ic_menu_share"-->
+                <!--android:title="Share" />-->
+            <!--<item-->
+                <!--android:id="@+id/nav_send"-->
+                <!--android:icon="@drawable/ic_menu_send"-->
+                <!--android:title="Send" />-->
+        <!--</menu>-->
+    <!--</item>-->
 
 </menu>
