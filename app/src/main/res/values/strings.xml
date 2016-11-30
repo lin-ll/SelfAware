@@ -10,7 +10,7 @@
          "name":"default_p",
          "version":1,
          "archive": {
-            "@schedule": {"interval": 300, "offset": 84600}
+            "@schedule": {"interval": 86400, "offset": 86400}
          },
          "data":[
             {

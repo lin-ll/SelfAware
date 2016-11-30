@@ -16,7 +16,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.*;
 
+import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 import com.google.gson.*;
+
+import java.util.ArrayList;
 
 import edu.mit.media.funf.*;
 import edu.mit.media.funf.json.IJsonObject;
@@ -193,6 +199,30 @@ public class MainActivity extends AppCompatActivity
                 Log.d("", "location!!");
             }
         });
+
+        HorizontalBarChart barChart = (HorizontalBarChart) findViewById(R.id.chart);
+
+        ArrayList<BarEntry> entries = new ArrayList<>();
+        entries.add(new BarEntry(4f, 0));
+        entries.add(new BarEntry(8f, 1));
+        entries.add(new BarEntry(6f, 2));
+        entries.add(new BarEntry(12f, 3));
+
+        BarDataSet dataset = new BarDataSet(entries, "Number of Calls");
+
+        ArrayList<String> labels = new ArrayList<>();
+        labels.add("None");
+        labels.add("Low");
+        labels.add("Medium");
+        labels.add("High");
+
+        BarData data = new BarData(labels, dataset);
+        // dataset.setColors(ColorTemplate.COLORFUL_COLORS); //
+        barChart.setData(data);
+        barChart.animateY(5000);
+
+        barChart.setDescription("Number of Calls During Activity");
+
     }
 
     @Override

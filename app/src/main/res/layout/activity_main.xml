@@ -23,4 +23,23 @@
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
 
+    <RelativeLayout
+        android:id="@+id/relativelayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <!--<com.github.mikephil.charting.charts.BarChart-->
+            <!--android:id="@+id/chart"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent" />-->
+
+
+         <com.github.mikephil.charting.charts.HorizontalBarChart
+            android:id="@+id/chart"
+            android:layout_width="match_parent"
+            android:layout_height="300dp" />
+
+
+    </RelativeLayout>
+
 </android.support.v4.widget.DrawerLayout>
