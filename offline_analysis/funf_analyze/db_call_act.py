@@ -23,7 +23,7 @@ def merge(db_files=None, out_file=None, overwrite=True, attempt_salvage=True):
     
     # Use default filename if it doesn't exist
     if not out_file:
-        out_file = 'analysis/call_act.db'
+        out_file = 'correlated/call_act.db'
     
     if os.path.exists(out_file):
         os.remove(out_file)
