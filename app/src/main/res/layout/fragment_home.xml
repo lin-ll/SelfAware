@@ -3,40 +3,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="ll7.secondapp.FragmentHome">
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical">
 
-    <!--<TextView android:id="@+id/dataCountText"-->
-        <!--android:text="None"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"/>-->
-    <!--<Button android:id="@+id/archiveButton"-->
-        <!--android:text="Save Data to SD Card"-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="wrap_content"/>-->
+        <TextView android:id="@+id/dataCountText"
+            android:text="None"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button android:id="@+id/archiveButton"
+            android:text="Save Data to SD Card"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
 
-    <!--<Button android:id="@+id/scanCall"-->
-        <!--android:text="Call Log Scan"-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="wrap_content"/>-->
+        <Button android:id="@+id/scanCall"
+            android:text="Call Log Scan"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
 
-    <!--<Button android:id="@+id/scanSMS"-->
-        <!--android:text="SMS Log Scan"-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="wrap_content"/>-->
+        <Button android:id="@+id/scanSMS"
+            android:text="SMS Log Scan"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
 
-    <!--<Button android:id="@+id/scanAct"-->
-        <!--android:text="Activity Scan"-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="wrap_content"/>-->
+        <Button android:id="@+id/scanAct"
+            android:text="Activity Scan"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
 
-    <!--<Button android:id="@+id/scanLoc"-->
-        <!--android:text="Location Scan"-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="wrap_content"/>-->
+        <Button android:id="@+id/scanLoc"
+            android:text="Location Scan"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
 
 </FrameLayout>

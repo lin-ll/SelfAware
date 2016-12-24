@@ -82,7 +82,7 @@ public class FragmentCallAct extends Fragment {
         entries.add(new BarEntry(6f, 2));
         BarDataSet dataset = new BarDataSet(entries, "Number of Calls");
 
-        ArrayList<String> labels = new ArrayList<>();
+        ArrayList<String> labels = new ArrayList<String>();
         labels.add("None");
         labels.add("Low");
         labels.add("High");
