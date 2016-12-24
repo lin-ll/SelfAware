@@ -7,21 +7,21 @@
             android:icon="@drawable/ic_menu_camera"
             android:title="Home" />
         <item
-            android:id="@+id/nav_calls"
+            android:id="@+id/nav_call_loc"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="Calls" />
+            android:title="Calls and Location" />
         <item
-            android:id="@+id/nav_sms"
+            android:id="@+id/nav_sms_loc"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="SMS" />
+            android:title="SMS and Location" />
         <item
-            android:id="@+id/nav_act"
+            android:id="@+id/nav_call_act"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Activity" />
+            android:title="Calls and Activity" />
         <item
-            android:id="@+id/nav_loc"
+            android:id="@+id/nav_sms_act"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Location" />
+            android:title="SMS and Activity" />
     </group>
 
     <!--<item android:title="Communicate">-->

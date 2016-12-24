@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.*;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.util.Log;
 import android.view.*;
 import android.support.design.widget.NavigationView;
@@ -136,6 +138,11 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        Fragment fragment = new FragmentHome();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.mainFrame, fragment);
+        ft.commit();
+
         // Displays the count of rows in the data
         dataCountView = (TextView) findViewById(R.id.dataCountText);
 
@@ -255,18 +262,20 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        Fragment fragment = null;
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
             // Handle the home action
-        } else if (id == R.id.nav_calls) {
+            fragment = new FragmentHome();
+        } else if (id == R.id.nav_call_loc) {
 
-        } else if (id == R.id.nav_sms) {
+        } else if (id == R.id.nav_sms_loc) {
 
-        } else if (id == R.id.nav_act) {
+        } else if (id == R.id.nav_call_act) {
 
-        } else if (id == R.id.nav_loc) {
+        } else if (id == R.id.nav_sms_act) {
 
         }
 
