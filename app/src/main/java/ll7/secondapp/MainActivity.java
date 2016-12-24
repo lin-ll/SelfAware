@@ -4,10 +4,9 @@ import android.content.*;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.*;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.*;
 import android.support.design.widget.NavigationView;
@@ -207,28 +206,28 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        HorizontalBarChart barChart = (HorizontalBarChart) findViewById(R.id.chart);
-
-        ArrayList<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(4f, 0));
-        entries.add(new BarEntry(8f, 1));
-        entries.add(new BarEntry(6f, 2));
-        entries.add(new BarEntry(12f, 3));
-
-        BarDataSet dataset = new BarDataSet(entries, "Number of Calls");
-
-        ArrayList<String> labels = new ArrayList<>();
-        labels.add("None");
-        labels.add("Low");
-        labels.add("Medium");
-        labels.add("High");
-
-        BarData data = new BarData(labels, dataset);
-        // dataset.setColors(ColorTemplate.COLORFUL_COLORS); //
-        barChart.setData(data);
-        barChart.animateY(5000);
-
-        barChart.setDescription("Number of Calls During Activity");
+//        HorizontalBarChart barChart = (HorizontalBarChart) findViewById(R.id.chart);
+//
+//        ArrayList<BarEntry> entries = new ArrayList<>();
+//        entries.add(new BarEntry(4f, 0));
+//        entries.add(new BarEntry(8f, 1));
+//        entries.add(new BarEntry(6f, 2));
+//        entries.add(new BarEntry(12f, 3));
+//
+//        BarDataSet dataset = new BarDataSet(entries, "Number of Calls");
+//
+//        ArrayList<String> labels = new ArrayList<>();
+//        labels.add("None");
+//        labels.add("Low");
+//        labels.add("Medium");
+//        labels.add("High");
+//
+//        BarData data = new BarData(labels, dataset);
+//        // dataset.setColors(ColorTemplate.COLORFUL_COLORS); //
+//        barChart.setData(data);
+//        barChart.animateY(5000);
+//
+//        barChart.setDescription("Number of Calls During Activity");
 
     }
 
@@ -270,14 +269,18 @@ public class MainActivity extends AppCompatActivity
             // Handle the home action
             fragment = new FragmentHome();
         } else if (id == R.id.nav_call_loc) {
-
+            fragment = new FragmentCallLoc();
         } else if (id == R.id.nav_sms_loc) {
-
+            fragment = new FragmentCallLoc();
         } else if (id == R.id.nav_call_act) {
-
+            fragment = new FragmentCallAct();
         } else if (id == R.id.nav_sms_act) {
-
+            fragment = new FragmentCallAct();
         }
+
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.mainFrame, fragment);
+        ft.commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
