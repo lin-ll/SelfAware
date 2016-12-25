@@ -19,40 +19,4 @@
         android:layout_height="match_parent" android:id="@+id/mainFrame">
     </FrameLayout>
 
-    <TextView android:id="@+id/dataCountText"
-        android:text="None"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-    <Button android:id="@+id/archiveButton"
-        android:text="Save Data to SD Card"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>
-
-    <Button android:id="@+id/scanCall"
-        android:text="Call Log Scan"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>
-
-    <Button android:id="@+id/scanSMS"
-        android:text="SMS Log Scan"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>
-
-    <Button android:id="@+id/scanAct"
-        android:text="Activity Scan"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>
-
-    <Button android:id="@+id/scanLoc"
-        android:text="Location Scan"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"/>
-
-    <!--<com.github.mikephil.charting.charts.HorizontalBarChart-->
-        <!--android:id="@+id/chart"-->
-        <!--android:layout_width="fill_parent"-->
-        <!--android:layout_height="150dp"-->
-        <!--android:layout_marginBottom="10dp"-->
-        <!--android:layout_marginTop="10dp" />-->
-
 </LinearLayout>
