@@ -1,9 +1,13 @@
 package ll7.secondapp;
 
 import android.app.FragmentManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.os.Environment;
+import android.util.Log;
 import android.view.*;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -21,9 +25,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterManager;
 
 import android.os.Bundle;
 
@@ -31,18 +36,17 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    SupportMapFragment smsMap;
-    SupportMapFragment callMap;
-    GoogleMap mMap;
-    GoogleApiClient mGoogleApiClient;
-    Location mLastLocation;
-    LatLng currLocation;
+    private SupportMapFragment sMap;
+    private GoogleMap mMap;
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLastLocation;
+    private LatLng currLocation;
+    private ClusterManager<MyItem> mClusterManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        smsMap = SupportMapFragment.newInstance();
-        callMap = SupportMapFragment.newInstance();
+        sMap = SupportMapFragment.newInstance();
 
         setContentView(R.layout.activity_main);
 
@@ -58,19 +62,80 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
+        onOptionsItemSelected(navigationView.getMenu().getItem(0));
 
         Fragment fragment = new FragmentHome();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.mainFrame, fragment);
         ft.commit();
 
-        smsMap.getMapAsync(this);
-        callMap.getMapAsync(this);
+        sMap.getMapAsync(this);
 
         buildGoogleApiClient();
         if(mGoogleApiClient!= null)
             mGoogleApiClient.connect();
         else Toast.makeText(this, "Not connected...", Toast.LENGTH_SHORT).show();
+    }
+
+    public void addCallMarkers() {
+        String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" + "call_loc.db";
+        Log.d("", "FILE PATH IS: " + filePath);
+        try {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READONLY);
+            if (db == null) Log.d("", "NO DATABASE");
+            else Log.d("", "DATABASE FOUND");
+
+            BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE);
+
+            Cursor mCur = db.rawQuery("SELECT * FROM data", null);
+            int cnt = 0;
+            while (mCur.moveToNext()) {
+                double lat = mCur.getFloat(4);
+                double lon = mCur.getFloat(5);
+                MyItem offsetItem = new MyItem(lat, lon);
+                mClusterManager.addItem(offsetItem);
+//                LatLng marker = new LatLng(lat, lon);
+//                mMap.addMarker(new MarkerOptions()
+//                        .position(marker)
+//                        .icon(icon));
+                cnt++;
+            }
+            Log.d("", ""+cnt);
+            mCur.close();
+
+        } catch(Exception e) {
+            Log.d("","Database not found.. :(");
+        }
+    }
+
+    public void addSmsMarkers() {
+        String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" + "sms_loc.db";
+        Log.d("", "FILE PATH IS: " + filePath);
+        try {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READONLY);
+            if (db == null) Log.d("", "NO DATABASE");
+            else Log.d("", "DATABASE FOUND");
+
+            BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE);
+
+            Cursor mCur = db.rawQuery("SELECT * FROM data", null);
+            int cnt = 0;
+            while (mCur.moveToNext()) {
+                double lat = mCur.getFloat(4);
+                double lon = mCur.getFloat(5);
+                MyItem offsetItem = new MyItem(lat, lon);
+                mClusterManager.addItem(offsetItem);
+//                LatLng marker = new LatLng(lat, lon);
+//                mMap.addMarker(new MarkerOptions()
+//                        .position(marker)
+//                        .icon(icon));
+                cnt++;
+            }
+            Log.d("", ""+cnt);
+            mCur.close();
+        } catch(Exception e) {
+            Log.d("","Database not found.. :(");
+        }
     }
 
     @Override
@@ -90,6 +155,18 @@ public class MainActivity extends AppCompatActivity
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setRotateGesturesEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
+
+        mClusterManager = new ClusterManager<MyItem>(this, mMap);
+        // Point the map's listeners at the listeners implemented by the cluster
+        // manager.
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+
+        // Add cluster items (markers) to the cluster manager.
+        //addItems();
+
+        addSmsMarkers();
+        addCallMarkers();
     }
 
     @Override
@@ -129,38 +206,31 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (smsMap.isAdded())
-            sfm.beginTransaction().hide(smsMap).commit();
-        if (callMap.isAdded())
-            sfm.beginTransaction().hide(callMap).commit();
+        if (sMap.isAdded())
+            sfm.beginTransaction().hide(sMap).commit();
 
         FrameLayout layout = (FrameLayout)findViewById(R.id.mainFrame);
-        layout.setVisibility(View.VISIBLE); // you can use INVISIBLE also instead of GONE
+        layout.setVisibility(View.VISIBLE);
 
         if (id == R.id.nav_home) {
             fragmentReplacer(fm, new FragmentHome());
-        } else if (id == R.id.nav_call_loc) {
-            layout.setVisibility(View.GONE); // you can use INVISIBLE also instead of GONE
-            if(!callMap.isAdded())
-                sfm.beginTransaction().add(R.id.map, callMap).commit();
-            else
-                sfm.beginTransaction().show(callMap).commit();
-        } else if (id == R.id.nav_sms_loc) {
-            layout.setVisibility(View.GONE); // you can use INVISIBLE also instead of GONE
-            if(!smsMap.isAdded())
-                sfm.beginTransaction().add(R.id.map, smsMap).commit();
-            else
-                sfm.beginTransaction().show(smsMap).commit();
-            fragmentReplacer(fm, new FragmentCallAct());
-        } else if (id == R.id.nav_call_act) {
-            fragmentReplacer(fm, new FragmentCallAct());
-        } else if (id == R.id.nav_sms_act) {
-            fragmentReplacer(fm, new FragmentCallAct());
+        } else if (id == R.id.nav_loc) {
+            mapFragmentHelper(sfm, layout);
+        } else if (id == R.id.nav_act) {
+            fragmentReplacer(fm, new FragmentAct());
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void mapFragmentHelper(android.support.v4.app.FragmentManager sfm, FrameLayout layout) {
+        layout.setVisibility(View.GONE);
+        if(!sMap.isAdded())
+            sfm.beginTransaction().add(R.id.map, sMap).commit();
+        else
+            sfm.beginTransaction().show(sMap).commit();
     }
 
     public void fragmentReplacer(FragmentManager fm, Fragment fragment) {
