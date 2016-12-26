@@ -4,37 +4,24 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:icon="@drawable/ic_menu_camera"
+            android:icon="@drawable/ic_person_black_24dp"
             android:title="Home" />
         <item
             android:id="@+id/nav_call_loc"
-            android:icon="@drawable/ic_menu_gallery"
+            android:icon="@drawable/ic_call_black_24dp"
             android:title="Calls and Location" />
         <item
             android:id="@+id/nav_sms_loc"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_chat_black_24dp"
             android:title="SMS and Location" />
         <item
             android:id="@+id/nav_call_act"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_call_black_24dp"
             android:title="Calls and Activity" />
         <item
             android:id="@+id/nav_sms_act"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_chat_black_24dp"
             android:title="SMS and Activity" />
     </group>
-
-    <!--<item android:title="Communicate">-->
-        <!--<menu>-->
-            <!--<item-->
-                <!--android:id="@+id/nav_share"-->
-                <!--android:icon="@drawable/ic_menu_share"-->
-                <!--android:title="Share" />-->
-            <!--<item-->
-                <!--android:id="@+id/nav_send"-->
-                <!--android:icon="@drawable/ic_menu_send"-->
-                <!--android:title="Send" />-->
-        <!--</menu>-->
-    <!--</item>-->
 
 </menu>
