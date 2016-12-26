@@ -162,9 +162,6 @@ public class MainActivity extends AppCompatActivity
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
 
-        // Add cluster items (markers) to the cluster manager.
-        //addItems();
-
         addSmsMarkers();
         addCallMarkers();
     }
