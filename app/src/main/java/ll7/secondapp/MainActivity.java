@@ -1,13 +1,12 @@
 package ll7.secondapp;
 
 import android.app.FragmentManager;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
 import android.location.Location;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -71,7 +70,7 @@ public class MainActivity extends AppCompatActivity
 
         public BitmapDescriptor getIcon() {
             return BitmapDescriptorFactory.defaultMarker((icon == 0) ?
-                    BitmapDescriptorFactory.HUE_AZURE : BitmapDescriptorFactory.HUE_ROSE);
+                    BitmapDescriptorFactory.HUE_RED : BitmapDescriptorFactory.HUE_BLUE);
         }
     }
 
@@ -111,10 +110,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected boolean shouldRenderAsCluster(Cluster cluster) {
-            // Always render clusters.
-            return cluster.getSize() > 5;
-        }
+        protected boolean shouldRenderAsCluster(Cluster cluster) { return cluster.getSize() > 5; }
     }
 
     @Override
@@ -146,12 +142,11 @@ public class MainActivity extends AppCompatActivity
         sMap.getMapAsync(this);
 
         buildGoogleApiClient();
-        if(mGoogleApiClient!= null)
-            mGoogleApiClient.connect();
+        if(mGoogleApiClient!= null) mGoogleApiClient.connect();
         else Toast.makeText(this, "Not connected...", Toast.LENGTH_SHORT).show();
     }
 
-    public void addMarkers(int db_type) {
+    private void addMarkers(int db_type) {
         String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" +
                 ((db_type == 0) ? "call_loc.db" : "sms_loc.db");
         Log.d("", "FILE PATH IS: " + filePath);
@@ -162,9 +157,7 @@ public class MainActivity extends AppCompatActivity
             Cursor mCur = db.rawQuery("SELECT * FROM data", null);
             int cnt = 0;
             while (mCur.moveToNext()) {
-                double lat = mCur.getFloat(4);
-                double lon = mCur.getFloat(5);
-                MyItem offsetItem = new MyItem(lat, lon, 0);
+                MyItem offsetItem = new MyItem(mCur.getFloat(4), mCur.getFloat(5), 0);
                 ((db_type == 0) ? mClusterManager1 : mClusterManager2).addItem(offsetItem);
                 cnt++;
             }
@@ -189,19 +182,20 @@ public class MainActivity extends AppCompatActivity
         mMap.getUiSettings().setRotateGesturesEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        mClusterManager1 = new ClusterManager<>(this, mMap);
-        mClusterManager1.setRenderer(new CustomClusterIcon(0, mClusterManager1));
-        mClusterManager2 = new ClusterManager<>(this, mMap);
-        mClusterManager2.setRenderer(new CustomClusterIcon(1, mClusterManager2));
-        // Point the map's listeners at the listeners implemented by the cluster
-        // manager.
-        mMap.setOnCameraIdleListener(mClusterManager1);
-        mMap.setOnMarkerClickListener(mClusterManager1);
-        mMap.setOnCameraIdleListener(mClusterManager2);
-        mMap.setOnMarkerClickListener(mClusterManager2);
+        mClusterManager1 = mcClusterManagerSetup(0);
+        mClusterManager2 = mcClusterManagerSetup(1);
 
         addMarkers(0);
         addMarkers(1);
+    }
+
+    private ClusterManager<MyItem> mcClusterManagerSetup(int mc) {
+        ClusterManager<MyItem> mClusterManager = new ClusterManager<>(this, mMap);
+        mClusterManager.setRenderer(new CustomClusterIcon(mc, mClusterManager));
+        // Point the map's listeners at the listeners implemented by the cluster manager.
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+        return mClusterManager;
     }
 
     @Override
@@ -244,7 +238,9 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_home) {
             fragmentReplacer(fm, new FragmentHome());
         } else if (id == R.id.nav_loc) {
-            mapFragmentHelper(sfm, layout);
+            layout.setVisibility(View.GONE);
+            if(!sMap.isAdded()) sfm.beginTransaction().add(R.id.map, sMap).commit();
+            else sfm.beginTransaction().show(sMap).commit();
         } else if (id == R.id.nav_act) {
             fragmentReplacer(fm, new FragmentAct());
         }
@@ -254,15 +250,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public void mapFragmentHelper(android.support.v4.app.FragmentManager sfm, FrameLayout layout) {
-        layout.setVisibility(View.GONE);
-        if(!sMap.isAdded())
-            sfm.beginTransaction().add(R.id.map, sMap).commit();
-        else
-            sfm.beginTransaction().show(sMap).commit();
-    }
-
-    public void fragmentReplacer(FragmentManager fm, Fragment fragment) {
+    private void fragmentReplacer(FragmentManager fm, Fragment fragment) {
         fm.beginTransaction().replace(R.id.mainFrame, fragment).commit();
     }
 

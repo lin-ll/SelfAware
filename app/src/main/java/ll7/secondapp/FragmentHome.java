@@ -187,10 +187,7 @@ public class FragmentHome extends Fragment implements Probe.DataListener{
         scanLoc.setEnabled(false);
         scanLoc.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v) {
-                locProbe.registerListener(mypipe);
-                Log.d("", "location!!");
-            }
+            public void onClick(View v) { locProbe.registerListener(mypipe); }
         });
 
         return view;
