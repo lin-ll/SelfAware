@@ -1,8 +1,13 @@
 package ll7.secondapp;
 
 import android.app.FragmentManager;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.location.Location;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
@@ -28,9 +33,15 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
+import com.google.maps.android.ui.IconGenerator;
 
 import android.os.Bundle;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
@@ -41,7 +52,70 @@ public class MainActivity extends AppCompatActivity
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private LatLng currLocation;
-    private ClusterManager<MyItem> mClusterManager;
+    private ClusterManager<MyItem> mClusterManager1;
+    private ClusterManager<MyItem> mClusterManager2;
+
+    private class MyItem implements ClusterItem {
+        private final LatLng mPosition;
+        private int icon;
+
+        public MyItem(double lat, double lng, int icon) {
+            mPosition = new LatLng(lat, lng);
+            this.icon = icon;
+        }
+
+        @Override
+        public LatLng getPosition() {
+            return mPosition;
+        }
+
+        public BitmapDescriptor getIcon() {
+            return BitmapDescriptorFactory.defaultMarker((icon == 0) ?
+                    BitmapDescriptorFactory.HUE_AZURE : BitmapDescriptorFactory.HUE_ROSE);
+        }
+    }
+
+    private class CustomClusterIcon extends DefaultClusterRenderer<MyItem> {
+
+        private int icon_type;
+
+        public CustomClusterIcon (int icon_type, ClusterManager<MyItem> clusterManager) {
+            super(getApplicationContext(), mMap, clusterManager);
+            this.icon_type = icon_type;
+        }
+
+        @Override
+        protected void onBeforeClusterItemRendered(MyItem item, MarkerOptions markerOptions) {
+            markerOptions.icon(item.getIcon());
+        }
+
+        @Override
+        protected void onBeforeClusterRendered(Cluster<MyItem> cluster, MarkerOptions markerOptions) {
+            // Draw multiple people.
+            // Note: this method runs on the UI thread. Don't spend too much time in here (like in this example).
+            IconGenerator ig = new IconGenerator(getApplicationContext());
+
+            int draw_icon = (icon_type == 0) ? R.drawable.ic_call_black_24dp : R.drawable.ic_chat_black_24dp;
+            int color = (icon_type == 0) ? android.R.color.holo_red_light : android.R.color.holo_blue_bright;
+
+            final Drawable clusterIcon = getResources().getDrawable(draw_icon);
+            clusterIcon.setColorFilter(getResources().getColor(color), PorterDuff.Mode.SRC_ATOP);
+
+            ig.setBackground(clusterIcon);
+
+            //modify padding for one or two digit numbers
+            ig.setContentPadding((cluster.getSize() < 10) ? 40 : 30, 20, 0, 0);
+
+            Bitmap icon = ig.makeIcon(String.valueOf(cluster.getSize()));
+            markerOptions.icon(BitmapDescriptorFactory.fromBitmap(icon));
+        }
+
+        @Override
+        protected boolean shouldRenderAsCluster(Cluster cluster) {
+            // Always render clusters.
+            return cluster.getSize() > 5;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,62 +151,26 @@ public class MainActivity extends AppCompatActivity
         else Toast.makeText(this, "Not connected...", Toast.LENGTH_SHORT).show();
     }
 
-    public void addCallMarkers() {
-        String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" + "call_loc.db";
+    public void addMarkers(int db_type) {
+        String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" +
+                ((db_type == 0) ? "call_loc.db" : "sms_loc.db");
         Log.d("", "FILE PATH IS: " + filePath);
         try {
             SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READONLY);
-            if (db == null) Log.d("", "NO DATABASE");
-            else Log.d("", "DATABASE FOUND");
-
-            BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE);
+            Log.d("", (db == null) ? "NO DATABASE" : "DATABASE FOUND");
 
             Cursor mCur = db.rawQuery("SELECT * FROM data", null);
             int cnt = 0;
             while (mCur.moveToNext()) {
                 double lat = mCur.getFloat(4);
                 double lon = mCur.getFloat(5);
-                MyItem offsetItem = new MyItem(lat, lon);
-                mClusterManager.addItem(offsetItem);
-//                LatLng marker = new LatLng(lat, lon);
-//                mMap.addMarker(new MarkerOptions()
-//                        .position(marker)
-//                        .icon(icon));
+                MyItem offsetItem = new MyItem(lat, lon, 0);
+                ((db_type == 0) ? mClusterManager1 : mClusterManager2).addItem(offsetItem);
                 cnt++;
             }
             Log.d("", ""+cnt);
             mCur.close();
 
-        } catch(Exception e) {
-            Log.d("","Database not found.. :(");
-        }
-    }
-
-    public void addSmsMarkers() {
-        String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" + "sms_loc.db";
-        Log.d("", "FILE PATH IS: " + filePath);
-        try {
-            SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READONLY);
-            if (db == null) Log.d("", "NO DATABASE");
-            else Log.d("", "DATABASE FOUND");
-
-            BitmapDescriptor icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE);
-
-            Cursor mCur = db.rawQuery("SELECT * FROM data", null);
-            int cnt = 0;
-            while (mCur.moveToNext()) {
-                double lat = mCur.getFloat(4);
-                double lon = mCur.getFloat(5);
-                MyItem offsetItem = new MyItem(lat, lon);
-                mClusterManager.addItem(offsetItem);
-//                LatLng marker = new LatLng(lat, lon);
-//                mMap.addMarker(new MarkerOptions()
-//                        .position(marker)
-//                        .icon(icon));
-                cnt++;
-            }
-            Log.d("", ""+cnt);
-            mCur.close();
         } catch(Exception e) {
             Log.d("","Database not found.. :(");
         }
@@ -142,35 +180,34 @@ public class MainActivity extends AppCompatActivity
     public void onMapReady(GoogleMap map) {
         mMap = map;
 
-        if (currLocation != null)
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(currLocation));
-        else {
-            LatLng princeton = new LatLng(40.3440, 74.6514);
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(princeton));
-        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLng((currLocation != null) ? currLocation : new LatLng(40.3440, 74.6514)));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
 
         mMap.getUiSettings().setCompassEnabled(true);
         mMap.getUiSettings().setIndoorLevelPickerEnabled(false);
-        mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.getUiSettings().setMapToolbarEnabled(true);
         mMap.getUiSettings().setRotateGesturesEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        mClusterManager = new ClusterManager<MyItem>(this, mMap);
+        mClusterManager1 = new ClusterManager<>(this, mMap);
+        mClusterManager1.setRenderer(new CustomClusterIcon(0, mClusterManager1));
+        mClusterManager2 = new ClusterManager<>(this, mMap);
+        mClusterManager2.setRenderer(new CustomClusterIcon(1, mClusterManager2));
         // Point the map's listeners at the listeners implemented by the cluster
         // manager.
-        mMap.setOnCameraIdleListener(mClusterManager);
-        mMap.setOnMarkerClickListener(mClusterManager);
+        mMap.setOnCameraIdleListener(mClusterManager1);
+        mMap.setOnMarkerClickListener(mClusterManager1);
+        mMap.setOnCameraIdleListener(mClusterManager2);
+        mMap.setOnMarkerClickListener(mClusterManager2);
 
-        addSmsMarkers();
-        addCallMarkers();
+        addMarkers(0);
+        addMarkers(1);
     }
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START))
-            drawer.closeDrawer(GravityCompat.START);
+        if (drawer.isDrawerOpen(GravityCompat.START)) drawer.closeDrawer(GravityCompat.START);
         else super.onBackPressed();
     }
 
@@ -186,11 +223,7 @@ public class MainActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) return true;
-        return super.onOptionsItemSelected(item);
+        return (item.getItemId() == R.id.action_settings) ? true : super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -203,8 +236,7 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (sMap.isAdded())
-            sfm.beginTransaction().hide(sMap).commit();
+        if (sMap.isAdded()) sfm.beginTransaction().hide(sMap).commit();
 
         FrameLayout layout = (FrameLayout)findViewById(R.id.mainFrame);
         layout.setVisibility(View.VISIBLE);
@@ -242,8 +274,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onConnected(Bundle arg0) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLastLocation != null)
-            currLocation = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        currLocation = (mLastLocation != null) ? new LatLng(mLastLocation.getLatitude(),
+                mLastLocation.getLongitude()) : null;
     }
 
     @Override

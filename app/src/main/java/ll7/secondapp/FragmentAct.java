@@ -32,43 +32,15 @@ public class FragmentAct extends Fragment {
         View view = inflater.inflate(R.layout.fragment_act, container, false);
 
         BarChart barChart = (BarChart) view.findViewById(R.id.chart);
-        ArrayList<BarEntry> entries1 = new ArrayList<>();
-        ArrayList<BarEntry> entries2 = new ArrayList<>();
-
-        String filePath1 = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" + "call_act.db";
-        Log.d("", "FILE PATH IS: " + filePath1);
-        try {
-            SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath1, null, SQLiteDatabase.OPEN_READONLY);
-            if (db == null) Log.d("", "NO DATABASE");
-            else Log.d("", "DATABASE FOUND");
-
-            entries1.add(new BarEntry(getCount(db, 0), 0));
-            entries1.add(new BarEntry(getCount(db, 1), 1));
-            entries1.add(new BarEntry(getCount(db, 2), 2));
-        } catch(Exception e) {
-            Log.d("","Database not found.. :(");
-        }
-
-        String filePath2 = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" + "sms_act.db";
-        Log.d("", "FILE PATH IS: " + filePath2);
-        try {
-            SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath2, null, SQLiteDatabase.OPEN_READONLY);
-            if (db == null) Log.d("", "NO DATABASE");
-            else Log.d("", "DATABASE FOUND");
-
-            entries2.add(new BarEntry(getCount(db, 0), 0));
-            entries2.add(new BarEntry(getCount(db, 1), 1));
-            entries2.add(new BarEntry(getCount(db, 2), 2));
-        } catch(Exception e) {
-            Log.d("","Database not found.. :(");
-        }
+        ArrayList<BarEntry> entries1 = parseSQL(0);
+        ArrayList<BarEntry> entries2 = parseSQL(1);
 
         BarDataSet calls = new BarDataSet(entries1, "Number of Calls");
         calls.setColors(ColorTemplate.COLORFUL_COLORS);
         BarDataSet sms = new BarDataSet(entries2, "Number of Texts");
         sms.setColors(ColorTemplate.PASTEL_COLORS);
 
-        List<String> labels = new ArrayList<String>();
+        List<String> labels = new ArrayList<>();
         labels.add("None");
         labels.add("Low");
         labels.add("High");
@@ -85,6 +57,25 @@ public class FragmentAct extends Fragment {
         barChart.setDescription("Number of Calls and Texts During Physical Activity");
 
         return view;
+    }
+
+    public ArrayList<BarEntry> parseSQL(int databaseNm) {
+        ArrayList<BarEntry> entries = new ArrayList<>();
+        String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" +
+                ((databaseNm == 0) ? "sms_act.db" : "call_act.db");
+        Log.d("", "FILE PATH IS: " + filePath);
+        try {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READONLY);
+            Log.d("", (db == null) ? "NO DATABASE" : "DATABASE FOUND");
+
+            entries.add(new BarEntry(getCount(db, 0), 0));
+            entries.add(new BarEntry(getCount(db, 1), 1));
+            entries.add(new BarEntry(getCount(db, 2), 2));
+        } catch(Exception e) {
+            Log.d("","Database not found.. :(");
+        }
+
+        return entries;
     }
 
     public int getCount(SQLiteDatabase db, int type_of_act) {
