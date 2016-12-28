@@ -2,9 +2,42 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ll7.secondapp">
 
+    <!-- Launching -->
+    <uses-permission android:name="android.permission.BATTERY_STATS" />
+
+    <!-- All probes -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <!-- Storage -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <!-- Location probe -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <!-- Call log probe -->
+    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+
+    <!-- SMS probe -->
+    <uses-permission android:name="android.permission.READ_SMS"/>
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Activity probe -->
+    <!-- no permissions necessary -->
+
+    <permission android:name="com.example.mapdemo.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>
+    <uses-permission android:name="com.example.mapdemo.permission.MAPS_RECEIVE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_selfaware"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -38,38 +71,5 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
     </application>
-
-    <!-- Launching -->
-    <uses-permission android:name="android.permission.BATTERY_STATS" />
-
-    <!-- All probes -->
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-
-    <!-- Storage -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-
-    <!-- Location probe -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-
-    <!-- Call log probe -->
-    <uses-permission android:name="android.permission.READ_CALL_LOG"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
-
-    <!-- SMS probe -->
-    <uses-permission android:name="android.permission.READ_SMS"/>
-
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
-
-    <!-- Activity probe -->
-    <!-- no permissions necessary -->
-
-    <permission android:name="com.example.mapdemo.permission.MAPS_RECEIVE" android:protectionLevel="signature"/>
-    <uses-permission android:name="com.example.mapdemo.permission.MAPS_RECEIVE"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
 
 </manifest>

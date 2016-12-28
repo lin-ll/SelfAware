@@ -36,7 +36,7 @@ import edu.mit.media.funf.storage.NameValueDatabaseHelper;
  */
 public class FragmentHome extends Fragment implements Probe.DataListener{
 
-    public static final String DEFAULT_PIPE = "default_p";
+    private static final String DEFAULT_PIPE = "default_p";
     private FunfManager funfManager;
     private BasicPipeline mypipe;
     private CallLogProbe callProbe;
@@ -58,6 +58,7 @@ public class FragmentHome extends Fragment implements Probe.DataListener{
         Cursor mcursor = db.rawQuery(TOTAL_COUNT_SQL, null);
         mcursor.moveToFirst();
         final int count = mcursor.getInt(0);
+        mcursor.close();
         // Update interface on main thread
         getActivity().runOnUiThread(new Runnable() {
             @Override
@@ -85,7 +86,7 @@ public class FragmentHome extends Fragment implements Probe.DataListener{
         locProbe.registerPassiveListener(FragmentHome.this);
     }
 
-    private ServiceConnection funfManagerConn = new ServiceConnection() {
+    private final ServiceConnection funfManagerConn = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             funfManager = ((FunfManager.LocalBinder)service).getManager();
@@ -153,7 +154,7 @@ public class FragmentHome extends Fragment implements Probe.DataListener{
         });
 
         // Bind to the service, to create the connection with FunfManager
-        getActivity().bindService(new Intent(this.getActivity(), FunfManager.class), funfManagerConn, getActivity().BIND_AUTO_CREATE);
+        getActivity().bindService(new Intent(this.getActivity(), FunfManager.class), funfManagerConn, Context.BIND_AUTO_CREATE);
 
         // Forces the pipeline to scan now
         scanCall = (Button) view.findViewById(R.id.scanCall);

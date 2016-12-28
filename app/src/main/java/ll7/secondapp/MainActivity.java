@@ -4,7 +4,6 @@ import android.app.FragmentManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -32,7 +31,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.MarkerManager;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
@@ -40,6 +41,9 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 import com.google.maps.android.ui.IconGenerator;
 
 import android.os.Bundle;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 
 public class MainActivity extends AppCompatActivity
@@ -49,18 +53,21 @@ public class MainActivity extends AppCompatActivity
     private SupportMapFragment sMap;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
-    private Location mLastLocation;
     private LatLng currLocation;
     private ClusterManager<MyItem> mClusterManager1;
     private ClusterManager<MyItem> mClusterManager2;
+    private Collection<MyItem> callCollection;
+    private Collection<MyItem> smsCollection;
+    private static final int CALL = 0;
+    private static final int SMS = 1;
 
     private class MyItem implements ClusterItem {
         private final LatLng mPosition;
-        private int icon;
+        private final int icon;
 
-        public MyItem(double lat, double lng, int icon) {
+        public MyItem(double lat, double lng, int ic) {
             mPosition = new LatLng(lat, lng);
-            this.icon = icon;
+            this.icon = ic;
         }
 
         @Override
@@ -69,14 +76,14 @@ public class MainActivity extends AppCompatActivity
         }
 
         public BitmapDescriptor getIcon() {
-            return BitmapDescriptorFactory.defaultMarker((icon == 0) ?
+            return BitmapDescriptorFactory.defaultMarker((icon == CALL) ?
                     BitmapDescriptorFactory.HUE_RED : BitmapDescriptorFactory.HUE_BLUE);
         }
     }
 
     private class CustomClusterIcon extends DefaultClusterRenderer<MyItem> {
 
-        private int icon_type;
+        private final int icon_type;
 
         public CustomClusterIcon (int icon_type, ClusterManager<MyItem> clusterManager) {
             super(getApplicationContext(), mMap, clusterManager);
@@ -94,8 +101,8 @@ public class MainActivity extends AppCompatActivity
             // Note: this method runs on the UI thread. Don't spend too much time in here (like in this example).
             IconGenerator ig = new IconGenerator(getApplicationContext());
 
-            int draw_icon = (icon_type == 0) ? R.drawable.ic_call_black_24dp : R.drawable.ic_chat_black_24dp;
-            int color = (icon_type == 0) ? android.R.color.holo_red_light : android.R.color.holo_blue_bright;
+            int draw_icon = (icon_type == CALL) ? R.drawable.ic_call_black_24dp : R.drawable.ic_chat_black_24dp;
+            int color = (icon_type == CALL) ? android.R.color.holo_red_light : android.R.color.holo_blue_dark;
 
             final Drawable clusterIcon = getResources().getDrawable(draw_icon);
             clusterIcon.setColorFilter(getResources().getColor(color), PorterDuff.Mode.SRC_ATOP);
@@ -110,7 +117,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         @Override
-        protected boolean shouldRenderAsCluster(Cluster cluster) { return cluster.getSize() > 5; }
+        protected boolean shouldRenderAsCluster(Cluster cluster) { return cluster.getSize() > 1; }
     }
 
     @Override
@@ -146,29 +153,6 @@ public class MainActivity extends AppCompatActivity
         else Toast.makeText(this, "Not connected...", Toast.LENGTH_SHORT).show();
     }
 
-    private void addMarkers(int db_type) {
-        String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" +
-                ((db_type == 0) ? "call_loc.db" : "sms_loc.db");
-        Log.d("", "FILE PATH IS: " + filePath);
-        try {
-            SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READONLY);
-            Log.d("", (db == null) ? "NO DATABASE" : "DATABASE FOUND");
-
-            Cursor mCur = db.rawQuery("SELECT * FROM data", null);
-            int cnt = 0;
-            while (mCur.moveToNext()) {
-                MyItem offsetItem = new MyItem(mCur.getFloat(4), mCur.getFloat(5), 0);
-                ((db_type == 0) ? mClusterManager1 : mClusterManager2).addItem(offsetItem);
-                cnt++;
-            }
-            Log.d("", ""+cnt);
-            mCur.close();
-
-        } catch(Exception e) {
-            Log.d("","Database not found.. :(");
-        }
-    }
-
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
@@ -178,23 +162,60 @@ public class MainActivity extends AppCompatActivity
 
         mMap.getUiSettings().setCompassEnabled(true);
         mMap.getUiSettings().setIndoorLevelPickerEnabled(false);
-        mMap.getUiSettings().setMapToolbarEnabled(true);
+        mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setRotateGesturesEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
 
-        mClusterManager1 = mcClusterManagerSetup(0);
-        mClusterManager2 = mcClusterManagerSetup(1);
+        mClusterManager1 = mcClusterManagerSetup(CALL);
+        mClusterManager2 = mcClusterManagerSetup(SMS);
 
-        addMarkers(0);
-        addMarkers(1);
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                mClusterManager1.onCameraIdle();
+                mClusterManager2.onCameraIdle();
+            }
+        });
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                mClusterManager1.onMarkerClick(marker);
+                mClusterManager2.onMarkerClick(marker);
+                return true;
+            }
+        });
     }
 
     private ClusterManager<MyItem> mcClusterManagerSetup(int mc) {
         ClusterManager<MyItem> mClusterManager = new ClusterManager<>(this, mMap);
         mClusterManager.setRenderer(new CustomClusterIcon(mc, mClusterManager));
-        // Point the map's listeners at the listeners implemented by the cluster manager.
-        mMap.setOnCameraIdleListener(mClusterManager);
-        mMap.setOnMarkerClickListener(mClusterManager);
+
+        Collection<MyItem> collection = new ArrayList<>();
+
+        String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" +
+                ((mc == CALL) ? "call_loc.db" : "sms_loc.db");
+        Log.d("", "FILE PATH IS: " + filePath);
+        try {
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READONLY);
+            Log.d("", (db == null) ? "NO DATABASE" : "DATABASE FOUND");
+
+            Cursor mCur = db.rawQuery("SELECT * FROM data", null);
+            int cnt = 0;
+            while (mCur.moveToNext()) {
+                MyItem offsetItem = new MyItem(mCur.getFloat(4), mCur.getFloat(5), mc);
+                collection.add(offsetItem);
+                cnt++;
+            }
+            Log.d("", ""+cnt);
+            mCur.close();
+        } catch(Exception e) {
+            Log.d("","Database not found.. :(");
+        }
+
+        mClusterManager.addItems(collection);
+        if (mc == CALL) callCollection = collection;
+        else smsCollection = collection;
         return mClusterManager;
     }
 
@@ -217,7 +238,7 @@ public class MainActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        return (item.getItemId() == R.id.action_settings) ? true : super.onOptionsItemSelected(item);
+        return (item.getItemId() == R.id.action_settings) || super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -261,7 +282,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onConnected(Bundle arg0) {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         currLocation = (mLastLocation != null) ? new LatLng(mLastLocation.getLatitude(),
                 mLastLocation.getLongitude()) : null;
     }
@@ -271,7 +292,7 @@ public class MainActivity extends AppCompatActivity
         Toast.makeText(this, "Connection suspended...", Toast.LENGTH_SHORT).show();
     }
 
-    protected synchronized void buildGoogleApiClient() {
+    private synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)

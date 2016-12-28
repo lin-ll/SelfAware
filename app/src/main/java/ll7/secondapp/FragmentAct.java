@@ -25,6 +25,9 @@ import java.util.List;
  */
 public class FragmentAct extends Fragment {
 
+    private static final int CALL = 0;
+    private static final int SMS = 1;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -32,8 +35,8 @@ public class FragmentAct extends Fragment {
         View view = inflater.inflate(R.layout.fragment_act, container, false);
 
         BarChart barChart = (BarChart) view.findViewById(R.id.chart);
-        ArrayList<BarEntry> entries1 = parseSQL(0);
-        ArrayList<BarEntry> entries2 = parseSQL(1);
+        ArrayList<BarEntry> entries1 = parseSQL(CALL);
+        ArrayList<BarEntry> entries2 = parseSQL(SMS);
 
         BarDataSet calls = new BarDataSet(entries1, "Number of Calls");
         calls.setColors(ColorTemplate.COLORFUL_COLORS);
@@ -59,10 +62,10 @@ public class FragmentAct extends Fragment {
         return view;
     }
 
-    public ArrayList<BarEntry> parseSQL(int databaseNm) {
+    private ArrayList<BarEntry> parseSQL(int databaseNm) {
         ArrayList<BarEntry> entries = new ArrayList<>();
         String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" +
-                ((databaseNm == 0) ? "sms_act.db" : "call_act.db");
+                ((databaseNm == CALL) ? "call_act.db" : "sms_act.db");
         Log.d("", "FILE PATH IS: " + filePath);
         try {
             SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READONLY);
@@ -78,7 +81,7 @@ public class FragmentAct extends Fragment {
         return entries;
     }
 
-    public int getCount(SQLiteDatabase db, int type_of_act) {
+    private int getCount(SQLiteDatabase db, int type_of_act) {
         Cursor mCur = db.rawQuery("SELECT count(*) FROM data WHERE type_of_act = " + type_of_act, null);
         mCur.moveToFirst();
         int cnt = mCur.getInt(0);

@@ -63,11 +63,11 @@ def merge(db_files=None, out_file=None, overwrite=True, attempt_salvage=True):
                 print "No file info exists in: " + db_file
                 continue
             print "Processing %s" % db_file
-            cursor1.execute("select * from %s where probe = 'loc'" % data_table)
+            cursor1.execute("select * from %s where probe = 'call'" % data_table)
             
             for row in cursor1:
                 id, device, probe, date, duration, datatype, lat, lon = row
-                cursor2.execute("select * from %s where probe = 'call' and date <= %d and date >= %d" % (data_table, date+tolerance, date-tolerance))
+                cursor2.execute("select * from %s where probe = 'loc' and date <= %d and date >= %d" % (data_table, date+tolerance, date-tolerance))
 
                 for row2 in cursor2:
                     id2, device2, probe2, date2, duration2, datatype2, lat2, lon2 = row2
