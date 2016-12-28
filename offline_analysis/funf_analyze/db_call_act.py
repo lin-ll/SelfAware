@@ -67,7 +67,7 @@ def merge(db_files=None, out_file=None, overwrite=True, attempt_salvage=True):
             
             for row in cursor1:
                 id, device, probe, date, duration, datatype, lat, lon = row
-                cursor2.execute("select * from %s where probe = 'call' and date <= %d and date >= %d" % (data_table, date+tolerance, date-tolerance))
+                cursor2.execute("select * from %s where probe = 'call' and date <= %d and date >= %d and datatype < 3" % (data_table, date+tolerance, date-tolerance))
 
                 for row2 in cursor2:
                     id2, device2, probe2, date2, duration2, datatype2, lat2, lon2 = row2
