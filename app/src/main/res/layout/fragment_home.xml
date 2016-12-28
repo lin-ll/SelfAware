@@ -9,31 +9,31 @@
         android:orientation="vertical">
 
         <TextView android:id="@+id/dataCountText"
-            android:text="None"
+            android:text="@string/none"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <Button android:id="@+id/archiveButton"
-            android:text="Save Data to SD Card"
+            android:text="@string/archive"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
 
         <Button android:id="@+id/scanCall"
-            android:text="Call Log Scan"
+            android:text="@string/scan_call"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
 
         <Button android:id="@+id/scanSMS"
-            android:text="SMS Log Scan"
+            android:text="@string/scan_sms"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
 
         <Button android:id="@+id/scanAct"
-            android:text="Activity Scan"
+            android:text="@string/scan_act"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
 
         <Button android:id="@+id/scanLoc"
-            android:text="Location Scan"
+            android:text="@string/scan_loc"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
     </LinearLayout>

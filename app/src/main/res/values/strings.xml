@@ -4,22 +4,33 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="scan_call">Call Log Scan</string>
+    <string name="scan_sms">SMS Log Scan</string>
+    <string name="scan_act">Activity Scan</string>
+    <string name="scan_loc">Location Scan</string>
+    <string name="archive">Save Data to SD Card</string>
+    <string name="none">None</string>
+
     <string name="action_settings">Settings</string>
     <string name="default_pipeline">
         {"@type":"edu.mit.media.funf.pipeline.BasicPipeline",
          "name":"default_p",
          "version":1,
          "archive": {
-            "@schedule": {"interval": 21600, "offset": 86400}
+            "@schedule": {
+                "@type": ".BatteryStateProbe",
+                "@schedule": {"interval": 21600, "offset": 86400},
+                "@filter": {"@type": ".KeyValueFilter", "matches": { "state": "HIGH" }}
+            }
          },
          "data":[
             {
                 "@type": "edu.mit.media.funf.probe.builtin.CallLogProbe",
-                "@schedule": {"interval": 3600}
+                "@schedule": {"interval": 86400}
             },
             {
                 "@type": "edu.mit.media.funf.probe.builtin.SmsProbe",
-                "@schedule": {"interval": 3600}
+                "@schedule": {"interval": 43200}
             },
             "edu.mit.media.funf.probe.builtin.ActivityProbe",
             {
@@ -30,6 +41,8 @@
         }
     </string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="activity_correlations">Activity Correlations</string>
+    <string name="location_correlations">Location Correlations</string>
+    <string name="home">Home</string>
+    <string name="description">Understand your personal phone activity better by connecting different datasets!</string>
 </resources>

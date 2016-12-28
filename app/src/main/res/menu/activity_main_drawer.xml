@@ -5,15 +5,15 @@
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_person_black_24dp"
-            android:title="Home" />
+            android:title="@string/home" />
         <item
             android:id="@+id/nav_loc"
             android:icon="@drawable/ic_place_black_24dp"
-            android:title="Location Correlations" />
+            android:title="@string/location_correlations" />
         <item
             android:id="@+id/nav_act"
             android:icon="@drawable/ic_directions_run_black_24dp"
-            android:title="Activity Correlations" />
+            android:title="@string/activity_correlations" />
     </group>
 
 </menu>
