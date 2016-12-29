@@ -1,6 +1,8 @@
 package ll7.secondapp;
 
+import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -42,8 +44,9 @@ import com.google.maps.android.ui.IconGenerator;
 import android.os.Bundle;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
@@ -59,6 +62,11 @@ public class MainActivity extends AppCompatActivity
     private Collection<MyItem> smsCollection;
     private static final int CALL = 0;
     private static final int SMS = 1;
+    private final String[] opts = new String[]{
+            "See Calls",
+            "See SMS"
+    };
+    private boolean[] checkedOpts;
 
     private class MyItem implements ClusterItem {
         private final LatLng mPosition;
@@ -125,6 +133,11 @@ public class MainActivity extends AppCompatActivity
         sMap = SupportMapFragment.newInstance();
 
         setContentView(R.layout.activity_main);
+
+        checkedOpts = new boolean[]{
+                true,
+                true
+        };
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -237,7 +250,56 @@ public class MainActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        return (item.getItemId() == R.id.action_settings) || super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_settings) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+            // Convert the color array to list
+            final List<String> list = Arrays.asList(opts);
+
+            builder.setMultiChoiceItems(opts, checkedOpts, new DialogInterface.OnMultiChoiceClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                    // Update the current focused item's checked status
+                    checkedOpts[which] = isChecked;
+                    // Get the current focused item
+                    String currentItem = list.get(which);
+                    // Notify the current action
+                    Toast.makeText(getApplicationContext(), currentItem + " is " + isChecked, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            // Specify the dialog is not cancelable
+            builder.setCancelable(false);
+            // Set a title for alert dialog
+            builder.setTitle("Map Settings");
+
+            // Set the positive/yes button click listener
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Do something when click positive button
+                    mClusterManager1.clearItems();
+                    mClusterManager2.clearItems();
+                    if (checkedOpts[CALL]) mClusterManager1.addItems(callCollection);
+                    if (checkedOpts[SMS]) mClusterManager2.addItems(smsCollection);
+                    dialog.dismiss();
+                }
+            });
+
+            // Set the negative/no button click listener
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Do something when click the negative button
+                    dialog.cancel();
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            // Display the alert dialog on interface
+            dialog.show();
+            return true;
+        } else return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

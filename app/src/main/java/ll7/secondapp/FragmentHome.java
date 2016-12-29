@@ -1,8 +1,6 @@
 package ll7.secondapp;
 
 import android.content.*;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
