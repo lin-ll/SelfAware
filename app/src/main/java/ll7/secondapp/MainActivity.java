@@ -51,31 +51,21 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-
     private SupportMapFragment sMap;
     private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LatLng currLocation;
-    private ClusterManager<MyItem> mClusterManager1;
-    private ClusterManager<MyItem> mClusterManager2;
-    private Collection<MyItem> callCollection;
-    private Collection<MyItem> smsCollection;
-    private static final int CALL = 0;
-    private static final int SMS = 1;
-    private final String[] opts = new String[]{
-            "See Calls",
-            "See SMS"
-    };
+    private ClusterManager<MyItem> mClusterManager1, mClusterManager2;
+    private Collection<MyItem> callCollection, smsCollection;
+    private static final int CALL = 0, SMS = 1;
+    private final String[] opts = new String[]{"See Calls", "See SMS"};
     private boolean[] checkedOpts;
 
     private class MyItem implements ClusterItem {
         private final LatLng mPosition;
         private final int icon;
 
-        public MyItem(double lat, double lng, int ic) {
-            mPosition = new LatLng(lat, lng);
-            this.icon = ic;
-        }
+        public MyItem(double lat, double lng, int ic) { mPosition = new LatLng(lat, lng); this.icon = ic; }
 
         @Override
         public LatLng getPosition() {
@@ -89,7 +79,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private class CustomClusterIcon extends DefaultClusterRenderer<MyItem> {
-
         private final int icon_type;
 
         public CustomClusterIcon (int icon_type, ClusterManager<MyItem> clusterManager) {
@@ -110,12 +99,10 @@ public class MainActivity extends AppCompatActivity
 
             int draw_icon = (icon_type == CALL) ? R.drawable.ic_call_black_24dp : R.drawable.ic_chat_black_24dp;
             int color = (icon_type == CALL) ? android.R.color.holo_red_light : android.R.color.holo_blue_dark;
-
             final Drawable clusterIcon = getResources().getDrawable(draw_icon);
             clusterIcon.setColorFilter(getResources().getColor(color), PorterDuff.Mode.SRC_ATOP);
 
             ig.setBackground(clusterIcon);
-
             //modify padding for one or two digit numbers
             ig.setContentPadding((cluster.getSize() < 10) ? 40 : 30, 20, 0, 0);
 
@@ -131,20 +118,15 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sMap = SupportMapFragment.newInstance();
-
         setContentView(R.layout.activity_main);
-
-        checkedOpts = new boolean[]{
-                true,
-                true
-        };
+        checkedOpts = new boolean[]{true, true};
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-            this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
@@ -168,7 +150,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
-
         mMap.moveCamera(CameraUpdateFactory.newLatLng((currLocation != null) ? currLocation : new LatLng(40.3440, 74.6514)));
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15));
 
@@ -202,7 +183,6 @@ public class MainActivity extends AppCompatActivity
     private ClusterManager<MyItem> mcClusterManagerSetup(int mc) {
         ClusterManager<MyItem> mClusterManager = new ClusterManager<>(this, mMap);
         mClusterManager.setRenderer(new CustomClusterIcon(mc, mClusterManager));
-
         Collection<MyItem> collection = new ArrayList<>();
 
         String filePath = Environment.getExternalStorageDirectory() + "/ll7.secondapp/correlated/" +
@@ -210,7 +190,7 @@ public class MainActivity extends AppCompatActivity
         Log.d("", "FILE PATH IS: " + filePath);
         try {
             SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READONLY);
-            Log.d("", (db == null) ? "NO DATABASE" : "DATABASE FOUND");
+            Log.d("", "DATABASE FOUND");
 
             Cursor mCur = db.rawQuery("SELECT * FROM data", null);
             int cnt = 0;
@@ -221,9 +201,7 @@ public class MainActivity extends AppCompatActivity
             }
             Log.d("", ""+cnt);
             mCur.close();
-        } catch(Exception e) {
-            Log.d("","Database not found.. :(");
-        }
+        } catch(Exception e) { Log.d("","Database not found.. :("); }
 
         mClusterManager.addItems(collection);
         if (mc == CALL) callCollection = collection;
@@ -247,13 +225,10 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Handle action bar item clicks here. The action bar will automatically handle clicks on
+        // the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         if (item.getItemId() == R.id.action_settings) {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-
-            // Convert the color array to list
             final List<String> list = Arrays.asList(opts);
 
             builder.setMultiChoiceItems(opts, checkedOpts, new DialogInterface.OnMultiChoiceClickListener() {
@@ -268,16 +243,13 @@ public class MainActivity extends AppCompatActivity
                 }
             });
 
-            // Specify the dialog is not cancelable
             builder.setCancelable(false);
-            // Set a title for alert dialog
             builder.setTitle("Map Settings");
 
             // Set the positive/yes button click listener
             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    // Do something when click positive button
                     mClusterManager1.clearItems();
                     mClusterManager2.clearItems();
                     if (checkedOpts[CALL]) mClusterManager1.addItems(callCollection);
@@ -289,31 +261,22 @@ public class MainActivity extends AppCompatActivity
             // Set the negative/no button click listener
             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // Do something when click the negative button
-                    dialog.cancel();
-                }
+                public void onClick(DialogInterface dialog, int which) { dialog.cancel(); }
             });
 
             AlertDialog dialog = builder.create();
-            // Display the alert dialog on interface
             dialog.show();
             return true;
         } else return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-
         FragmentManager fm = getFragmentManager();
         android.support.v4.app.FragmentManager sfm = getSupportFragmentManager();
-
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (sMap.isAdded()) sfm.beginTransaction().hide(sMap).commit();
-
         FrameLayout layout = (FrameLayout)findViewById(R.id.mainFrame);
         layout.setVisibility(View.VISIBLE);
 

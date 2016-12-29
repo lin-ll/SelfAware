@@ -32,8 +32,7 @@ import edu.mit.media.funf.storage.NameValueDatabaseHelper;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class FragmentHome extends Fragment implements Probe.DataListener{
-
+public class FragmentHome extends Fragment implements Probe.DataListener {
     private static final String DEFAULT_PIPE = "default_p";
     private FunfManager funfManager;
     private BasicPipeline mypipe;
@@ -44,7 +43,6 @@ public class FragmentHome extends Fragment implements Probe.DataListener{
     private Button archiveButton, scanCall, scanSMS, scanAct, scanLoc;
     private TextView dataCountView;
     private Handler handler;
-
     private static final String TOTAL_COUNT_SQL = "SELECT count(*) FROM " + NameValueDatabaseHelper.DATA_TABLE.name;
 
     /**
@@ -77,7 +75,6 @@ public class FragmentHome extends Fragment implements Probe.DataListener{
 
     public void onDataReceived(IJsonObject probeConfig, IJsonObject data) {
         // Re-register to keep listening after probe completes.
-        //Log.d("", data.toString());
         callProbe.registerPassiveListener(FragmentHome.this);
         smsProbe.registerPassiveListener(FragmentHome.this);
         actProbe.registerPassiveListener(FragmentHome.this);

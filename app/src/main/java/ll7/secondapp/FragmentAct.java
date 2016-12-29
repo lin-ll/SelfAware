@@ -24,9 +24,7 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class FragmentAct extends Fragment {
-
-    private static final int CALL = 0;
-    private static final int SMS = 1;
+    private static final int CALL = 0, SMS = 1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -53,10 +51,8 @@ public class FragmentAct extends Fragment {
         dataset.add(sms);
 
         BarData data = new BarData(labels, dataset);
-
         barChart.setData(data);
         barChart.animateY(5000);
-
         barChart.setDescription("Number of Calls and Texts During Physical Activity");
 
         return view;
@@ -69,15 +65,11 @@ public class FragmentAct extends Fragment {
         Log.d("", "FILE PATH IS: " + filePath);
         try {
             SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READONLY);
-            Log.d("", (db == null) ? "NO DATABASE" : "DATABASE FOUND");
-
+            Log.d("", "DATABASE FOUND");
             entries.add(new BarEntry(getCount(db, 0), 0));
             entries.add(new BarEntry(getCount(db, 1), 1));
             entries.add(new BarEntry(getCount(db, 2), 2));
-        } catch(Exception e) {
-            Log.d("","Database not found.. :(");
-        }
-
+        } catch(Exception e) { Log.d("","Database not found.. :("); }
         return entries;
     }
 
