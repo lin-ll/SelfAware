@@ -12,6 +12,7 @@ import android.location.Location;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.Environment;
+import android.support.multidex.MultiDex;
 import android.util.Log;
 import android.view.*;
 import android.support.design.widget.NavigationView;
@@ -117,6 +118,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        MultiDex.install(this);
         sMap = SupportMapFragment.newInstance();
         setContentView(R.layout.activity_main);
         checkedOpts = new boolean[]{true, true};
